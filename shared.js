@@ -1,11 +1,8 @@
-var s = document.createElement("script");
-s.src = chrome.runtime.getURL("inject.js");
-s.id = "injected-blue-block-xhr";
-s.type = "text/javascript";
-// s.onload = function() {
-// 	this.remove();
-// };
-(document.head || document.documentElement).appendChild(s);
+// var s = document.createElement("script");
+// s.src = chrome.runtime.getURL("inject.js");
+// s.id = "injected-blue-block-xhr";
+// s.type = "text/javascript";
+// (document.head || document.documentElement).appendChild(s);
 
 export const DefaultOptions = {
 	// by default, spare as many people as possible

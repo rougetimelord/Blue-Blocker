@@ -1,6 +1,6 @@
-const RequestRegex = /^https:\/\/(?:\w+\.)?twitter.com\/[\w\/]+\/(HomeLatestTimeline|HomeTimeline|UserTweets|timeline\/home\.json|TweetDetail)(?:$|\?)/;
 
 (function(xhr) {
+	const RequestRegex = /^https:\/\/(?:\w+\.)?twitter.com\/[\w\/]+\/(HomeLatestTimeline|HomeTimeline|UserTweets|timeline\/home\.json|TweetDetail)(?:$|\?)/;
 	let XHR = XMLHttpRequest.prototype;
 	let open = XHR.open;
 	let send = XHR.send;
@@ -27,3 +27,8 @@ const RequestRegex = /^https:\/\/(?:\w+\.)?twitter.com\/[\w\/]+\/(HomeLatestTime
 		return send.apply(this, arguments);
 	};
 })(XMLHttpRequest);
+
+(async () => {
+	const src = chrome.runtime.getURL('./chrome/script.js');
+	const _ = await import(src);
+})();

@@ -6,33 +6,22 @@
 	"icons": {
 		"128": "assets/icon-128.png"
 	},
-	"web_accessible_resources": [
-		{
-			"resources": [
-				"chrome/script.js",
-				"shared.js",
-				"inject.js"
-			],
-			"matches": [
-				"*://*.twitter.com/*",
-				"*://twitter.com/*"
-			]
-		}
-	],
 	"action": {
 		"default_popup": "chrome/popup.html",
 		"default_icon": "assets/icon.png"
 	},
-	"permissions": [
-		"storage"
+	"host_permissions": [
+		"*://*.twitter.com/*",
+		"*://twitter.com/*"
 	],
-	"content_scripts": [
-		{
-			"matches": [
-				"*://*.twitter.com/*",
-				"*://twitter.com/*"
-			],
-			"js": ["chrome/main.js"]
-		}
-	]
+	"permissions": [
+		"scripting",
+		"activeTab",
+		"storage",
+		"webRequest"
+	],
+	"background": {
+		"service_worker": "chrome/main.js",
+		"type": "module"
+	}
 }

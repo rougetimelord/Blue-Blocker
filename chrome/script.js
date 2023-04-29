@@ -23,3 +23,4 @@ document.addEventListener("blue-blocker-event", function (e) {
 		}
 	});
 });
+console.log("jobs done")
