@@ -16,7 +16,7 @@ api.storage.local.onChanged.addListener((items) => {
 
 api.storage.sync.get(DefaultOptions).then(async items => {
 	// set initial extension state
-	api.action.setIcon({ path: items.suspendedBlockCollection ? "/icon/icon-128-greyscale.png" : "/icon/icon-128.png" });
+	api.action.setIcon({ path: (items.suspendBlockCollection || items.suspendBlocking) ? "/icon/icon-128-greyscale.png" : "/icon/icon-128.png" })
 	if (items.skipVerified) {
 		await PopulateVerifiedDb();
 	}

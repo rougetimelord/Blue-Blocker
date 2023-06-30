@@ -219,15 +219,29 @@ api.storage.local.onChanged.addListener((items) => {
 		}
 	});
 });
+api.storage.sync.onChanged.addListener(items => {
+	if (items.hasOwnProperty("suspendBlocking"))
+	{
+		if (items.suspendBlocking.newValue) {
+			consumer.stop();
+		} else {
+			consumer.start();
+		}
+	}
+});
 
-function queueBlockUser(user: BlueBlockerUser, user_id: string, reason: number) {
+function queueBlockUser(user: BlueBlockerUser, user_id: string, reason: number, config: Config) {
 	if (blockCache.has(user_id)) {
 		return;
 	}
 	blockCache.add(user_id);
 	queue.push({ user_id, reason, user: { name: user.legacy.name, screen_name: user.legacy.screen_name } });
 	console.log(logstr, `queued ${FormatLegacyName(user.legacy)} for a block due to ${ReasonMap[reason]}.`);
-	consumer.start();
+	if (!config.suspendBlocking) {
+		consumer.start();
+	} else {
+		console.log(logstr, "consumer did not start, blocking is suspended.");
+	}
 }
 
 function checkBlockQueue(): Promise<void> {
@@ -268,10 +282,16 @@ function checkBlockQueue(): Promise<void> {
 }
 
 const consumer = new QueueConsumer(api.storage.local, checkBlockQueue, async () => {
-	const items = await api.storage.sync.get({ blockInterval: DefaultOptions.blockInterval });
+	const items = await api.storage.sync.get({ blockInterval: DefaultOptions.blockInterval, suspendBlocking: false });
 	return items.blockInterval * 1000;
 });
-consumer.start();
+api.storage.sync.get({ suspendBlocking: false }).then(items => {
+	if (!items.suspendBlocking) {
+		consumer.start();
+	} else {
+		console.log(logstr, "consumer did not start, blocking is suspended.");
+	}
+});
 
 const CsrfTokenRegex = /ct0=\s*(\w+);/;
 function blockUser(user: { name: string, screen_name: string }, user_id: string, reason: number, attempt = 1) {
@@ -457,20 +477,20 @@ export async function BlockBlueVerified(user: BlueBlockerUser, config: Config) {
 			if (hasBlockableVerifiedTypes) {
 				reason = ReasonBusinessVerified;
 			}
-			queueBlockUser(user, String(user.rest_id), reason);
+			queueBlockUser(user, String(user.rest_id), reason, config);
 			return;
 		}
 	}
 
 	// step 2: is user an nft bro
 	if (config.blockNftAvatars && (user.has_nft_avatar || user.profile_image_shape === "Hexagon")) {
-		queueBlockUser(user, String(user.rest_id), ReasonNftAvatar);
+		queueBlockUser(user, String(user.rest_id), ReasonNftAvatar, config);
 		return;
 	}
 
 	// step 3: promoted tweets
 	if (config.blockPromoted && user.promoted_tweet) {
-		queueBlockUser(user, String(user.rest_id), ReasonPromoted);
+		queueBlockUser(user, String(user.rest_id), ReasonPromoted, config);
 		return;
 	}
 
@@ -484,7 +504,7 @@ export async function BlockBlueVerified(user: BlueBlockerUser, config: Config) {
 			);
 			console.debug(logstr, `soupcan response for @${user.legacy.screen_name}:`, response);
 			if (response?.status === "transphobic") {
-				queueBlockUser(user, String(user.rest_id), ReasonTransphobia);
+				queueBlockUser(user, String(user.rest_id), ReasonTransphobia, config);
 				return;
 			}
 		} catch (_e) {

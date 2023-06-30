@@ -145,6 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	const blockedUsersCount = document.getElementById("blocked-users-count") as HTMLElement;
 	const blockedUserQueueLength = document.getElementById("blocked-user-queue-length") as HTMLElement;
 	const suspendBlockCollection = document.getElementById("suspend-block-collection") as HTMLInputElement;
+	const suspendBlocking = document.getElementById("suspend-blocking") as HTMLInputElement;
 	const showBlockPopups = document.getElementById("show-block-popups") as HTMLInputElement;
 	const muteInsteadOfBlock = document.getElementById("mute-instead-of-block") as HTMLInputElement;
 	const blockFollowing = document.getElementById("block-following") as HTMLInputElement;
@@ -158,14 +159,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	api.storage.sync.get(DefaultOptions).then(_config => {
 		const config = _config as Config;
+		function suspendHandler(target: HTMLInputElement) {
+			document.getElementsByName(target.id + "-status").forEach(status => {
+				status.textContent = target.checked ? "paused" : "resumed";
+				setTimeout(() => status.textContent = null, 1000);
+			});
+			api.storage.sync.get({ suspendedBlockCollection: false, suspendBlocking: false })
+			.then(items =>
+				api.action.setIcon({ path: (items.suspendedBlockCollection || items.suspendBlocking) ? "/icon/icon-128-greyscale.png" : "/icon/icon-128.png" })
+			);
+		}
 		checkHandler(suspendBlockCollection, config, "suspendedBlockCollection", {
-			callback(target) {
-				document.getElementsByName(target.id + "-status").forEach(status => {
-					status.textContent = target.checked ? "paused" : "resumed";
-					setTimeout(() => status.textContent = null, 1000);
-				});
-				api.action.setIcon({ path: target.checked ? "/icon/icon-128-greyscale.png" : "/icon/icon-128.png" });
-			},
+			callback: suspendHandler,
+		});
+		checkHandler(suspendBlocking, config, "suspendBlocking", {
+			callback: suspendHandler,
 		});
 		checkHandler(showBlockPopups, config, "showBlockPopups", {
 			optionName: "popup-timer-slider",

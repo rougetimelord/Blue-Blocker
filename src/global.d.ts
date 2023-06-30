@@ -2,6 +2,7 @@
 
 interface Config {
 	suspendedBlockCollection: boolean,
+	suspendBlocking: boolean,
 	showBlockPopups: boolean,
 	mute: boolean,
 	blockFollowing: boolean,
