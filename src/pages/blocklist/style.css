@@ -143,7 +143,6 @@ label:focus {
 .button,
 .button:active,
 .button:focus {
-	margin-left: 1em;
 	font-size: 1em;
 	padding: 0.5em 1em;
 	color: var(--textcolor);
