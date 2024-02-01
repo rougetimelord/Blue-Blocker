@@ -99,4 +99,3 @@ export const ErrorStatus: ErrorStatus = "ERROR";
 export const EventKey = "MultiTabEvent";
 export const ErrorEvent = "ErrorEvent";
 export const MessageEvent = "MessageEvent";
-export const ListImportEvent = 'ListImportEvent'

@@ -1,5 +1,5 @@
 import { ConnectDb, historyDbStore } from '../../background/db';
-import { api, logstr, EventKey, ReasonImported, ListImportEvent } from '../../constants';
+import { api, logstr, ReasonImported } from '../../constants';
 import { EscapeHtml, commafy } from '../../utilities';
 
 export function exportBlockList() {
