@@ -18,7 +18,8 @@
 		"dev": "vite",
 		"build": "tsc && vite build",
 		"preview": "vite preview",
-		"fmt": "prettier --write **/*.{ts,json,css,scss,md}"
+		"fmt": "prettier --write **/*.{ts,json,css,scss,md}",
+		"version": "cross-var echo new version: $npm_package_version && node -e \"const fs = require('fs').promises; fs.readFile('./src/manifest.ts','utf-8').then(oldManifest => oldManifest.replace(/(?:\\d+\\.){2,3}(?:\\d)(?:-[\\w\\d\\-]*)?/, process.env.npm_package_version)).then(newManifest => fs.writeFile('./src/manifest.ts', newManifest, 'utf-8'))\""
 	},
 	"engines": {
 		"node": ">=18.16.0"
