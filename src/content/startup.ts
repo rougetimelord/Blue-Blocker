@@ -1,4 +1,5 @@
 import { api, DefaultOptions } from "../constants";
+import { GetToastContainer } from "../utilities";
 
 // https://github.com/crxjs/chrome-extension-tools/issues/576#issuecomment-1312838225
 // TODO: see if we can remove this ignore
@@ -15,21 +16,17 @@ l.href = api.runtime.getURL("src/injected/style.css"); // MUST BE ABSOLUTE PATH
 l.rel = "stylesheet";
 (document.head || document.documentElement).appendChild(l);
 
-const toasts = document.createElement("div");
-toasts.id = "injected-blue-block-toasts";
-document.body.appendChild(toasts);
-
 api.storage.sync.get(DefaultOptions).then(_config => {
 	const config = _config as Config;
-	// @ts-ignore
-	toasts.classList = "";
+	const toasts = GetToastContainer();
+	toasts.className = "";
 	toasts.classList.add(config.toastsLocation);
 });
 
 api.storage.sync.onChanged.addListener(items => {
 	if (items.hasOwnProperty("toastsLocation")) {
-		// @ts-ignore
-		toasts.classList = "";
+		const toasts = GetToastContainer()
+		toasts.className = "";
 		toasts.classList.add(items.toastsLocation.newValue);
 	}
 });

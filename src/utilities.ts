@@ -110,11 +110,18 @@ export function FormatLegacyName(user: { name: string, screen_name: string }) {
 	return `${legacyName} (@${screenName})`;
 }
 
+export function GetToastContainer() {
+	const container = document.getElementById("injected-blue-block-toasts");
+	if (container !== null) return container;
+	
+	const newContainer = document.createElement("div");
+	newContainer.id = "injected-blue-block-toasts";
+	document.body.appendChild(newContainer);
+	return newContainer;
+}
+
 export function MakeToast(content: string, config: Config, options: { html?: boolean, warn?: boolean, error?: boolean, elements?: Array<HTMLElement> } = { }) {
-	const ele = document.getElementById("injected-blue-block-toasts");
-	if (!ele) {
-		throw new Error("blue blocker was unable to create or find toasts div.");
-	}
+	const ele = GetToastContainer();
 
 	const t = document.createElement("div");
 	let popupTimer: number = 60e3;
@@ -139,9 +146,9 @@ export function MakeToast(content: string, config: Config, options: { html?: boo
 	close.innerText = "✕";
 	close.className = "close";
 
-	const timeout = setTimeout(() => ele.removeChild(t), popupTimer);
+	const timeout = setTimeout(() => ele?.removeChild(t), popupTimer);
 	close.onclick = () => {
-		ele.removeChild(t);
+		ele?.removeChild(t);
 		clearTimeout(timeout);
 	};
 
