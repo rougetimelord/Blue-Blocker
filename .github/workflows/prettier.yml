@@ -31,5 +31,3 @@ jobs:
               with:
                 prettier: true
                 prettier_args: "**/*.{ts,json,css,scss,md}"
-                auto_fix: true
-                commit_message: "[chore] run ${linter}"
