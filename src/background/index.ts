@@ -29,6 +29,8 @@ import {
 	RemoveUserFromHistory,
 } from './db';
 
+const test = "Prettier should hate this"
+
 api.action.setBadgeBackgroundColor({ color: '#666' });
 if (api.action.hasOwnProperty('setBadgeTextColor')) {
 	// setBadgeTextColor requires chrome 110+
