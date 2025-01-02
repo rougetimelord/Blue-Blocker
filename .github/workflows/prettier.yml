@@ -33,4 +33,4 @@ jobs:
         uses: wearerequired/lint-action@v2
         with:
           prettier: true
-          autofix: true
+          auto_fix: true
