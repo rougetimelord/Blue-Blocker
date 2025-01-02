@@ -30,6 +30,6 @@ jobs:
               uses: wearerequired/lint-action@v2.3.0
               with:
                 prettier: true
-                prettier_args: "--write **/*.{ts,json,css,scss,md}"
+                prettier_args: "**/*.{ts,json,css,scss,md}"
                 auto_fix: true
                 commit_message: "[chore] run ${linter}"
