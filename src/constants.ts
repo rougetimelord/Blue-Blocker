@@ -1,4 +1,4 @@
-const TEST = 'I HATE THIS';
+const TEST = "I HATE THIS";
 let _api: {
 	action: typeof chrome.action | typeof browser.browserAction;
 	runtime: typeof chrome.runtime;
