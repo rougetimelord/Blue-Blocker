@@ -3,7 +3,7 @@ import { defineManifest } from '@crxjs/vite-plugin';
 export default defineManifest({
 	name: 'Blue Blocker',
 	description: 'Blocks all Twitter Blue verified users on twitter.com',
-	version: '0.4.13',
+	version: '0.4.15',
 	manifest_version: 3,
 	icons: {
 		'128': 'icon/icon-128.png',
@@ -29,6 +29,7 @@ export default defineManifest({
 				// only files that are accessed from web pages need to be listed here. ie: injected files and assets
 				'src/injected/*',
 				'icon/*',
+				'pages/consent/*'
 			],
 			matches: ['*://*.twitter.com/*', '*://twitter.com/*', '*://*.x.com/*', '*://x.com/*'],
 		},
