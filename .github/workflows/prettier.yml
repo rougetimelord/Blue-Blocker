@@ -1,33 +1,36 @@
 ---
 name: Prettier
-# Runs and writes the results of prettier to changed files
-# Only runs when changes happen to main
-
 on:
-    pull_request_target:
+    push:
+        branches:
+            - main
+    pull_request:
         branches:
             - main
 
-permissions:
-  checks: write
-  contents: write
-
 jobs:
-    prettier:
-        runs-on: ubuntu-latest
+  run-linters:
+    name: Run linters
+    runs-on: ubuntu-latest
 
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4
-              with:
-                  # Make sure the actual branch is checked out when running on pull requests
-                  ref: ${{ github.head_ref }}
-            
-            - name: Install prettier
-              run: npm install prettier
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
 
-            - name: Run prettier              
-              uses: wearerequired/lint-action@v2.3.0
-              with:
-                prettier: true
-                prettier_args: "**/*.{ts,json,css,scss,md}"
+      - name: Set up Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+
+      # ESLint and Prettier must be in `package.json`
+      - name: Install Node.js dependencies
+        run: npm ci
+
+
+
+
+
+      - name: Run linters
+        uses: wearerequired/lint-action@v2
+        with:
+          prettier: true
