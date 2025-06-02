@@ -1,5 +1,6 @@
 import { api, logstr, EventKey, ErrorEvent } from '../constants';
 import { BlockBlueVerified } from '../shared';
+import { getScreenName, getUserName, isFollowing } from '../utilities';
 // This file contains a bit of a special case for responses. many responses
 // on twitter contain a shared type stored in an "instructions" key within
 // the response body. since it doesn't match one specific request, it has
@@ -7,21 +8,28 @@ import { BlockBlueVerified } from '../shared';
 
 // when parsing a timeline response body, these are the paths to navigate in the json to retrieve the "instructions" object
 // the key to this object is the capture group from the request regex in inject.js
-const InstructionsPaths: { [key: string]: string[] } = {
-	HomeLatestTimeline: ['data', 'home', 'home_timeline_urt', 'instructions'],
-	HomeTimeline: ['data', 'home', 'home_timeline_urt', 'instructions'],
-	SearchTimeline: ['data', 'search_by_raw_query', 'search_timeline', 'timeline', 'instructions'],
-	Favoriters: ['data', 'favoriters_timeline', 'timeline', 'instructions'],
-	Retweeters: ['data', 'retweeters_timeline', 'timeline', 'instructions'],
-	UserTweets: ['data', 'user', 'result', 'timeline_v2', 'timeline', 'instructions'],
-	Followers: ['data', 'user', 'result', 'timeline', 'timeline', 'instructions'],
-	Following: ['data', 'user', 'result', 'timeline', 'timeline', 'instructions'],
-	UserCreatorSubscriptions: ['data', 'user', 'result', 'timeline', 'timeline', 'instructions'],
-	FollowersYouKnow: ['data', 'user', 'result', 'timeline', 'timeline', 'instructions'],
-	BlueVerifiedFollowers: ['data', 'user', 'result', 'timeline', 'timeline', 'instructions'],
-	TweetDetail: ['data', 'threaded_conversation_with_injections_v2', 'instructions'],
-	ModeratedTimeline: ['data', 'tweet', 'result', 'timeline_response', 'timeline', 'instructions'],
-	'search/adaptive.json': ['timeline', 'instructions'],
+const InstructionsPaths: { [key: string]: string[][] } = {
+	HomeLatestTimeline: [['data', 'home', 'home_timeline_urt', 'instructions']],
+	HomeTimeline: [['data', 'home', 'home_timeline_urt', 'instructions']],
+	SearchTimeline: [
+		['data', 'search_by_raw_query', 'search_timeline', 'timeline', 'instructions'],
+	],
+	Favoriters: [['data', 'favoriters_timeline', 'timeline', 'instructions']],
+	Retweeters: [['data', 'retweeters_timeline', 'timeline', 'instructions']],
+	UserTweets: [
+		['data', 'user', 'result', 'timeline_v2', 'timeline', 'instructions'],
+		['data', 'user', 'result', 'timeline', 'timeline', 'instructions'],
+	],
+	Followers: [['data', 'user', 'result', 'timeline', 'timeline', 'instructions']],
+	Following: [['data', 'user', 'result', 'timeline', 'timeline', 'instructions']],
+	UserCreatorSubscriptions: [['data', 'user', 'result', 'timeline', 'timeline', 'instructions']],
+	FollowersYouKnow: [['data', 'user', 'result', 'timeline', 'timeline', 'instructions']],
+	BlueVerifiedFollowers: [['data', 'user', 'result', 'timeline', 'timeline', 'instructions']],
+	TweetDetail: [['data', 'threaded_conversation_with_injections_v2', 'instructions']],
+	ModeratedTimeline: [
+		['data', 'tweet', 'result', 'timeline_response', 'timeline', 'instructions'],
+	],
+	'search/adaptive.json': [['timeline', 'instructions']],
 };
 // this is the path to retrieve the user object from the individual tweet
 const UserObjectPath: string[] = [
@@ -32,7 +40,7 @@ const UserObjectPath: string[] = [
 	'user_results',
 	'result',
 ];
-const IgnoreTweetTypes = new Set(['TimelineTimelineCursor']);
+const IgnoreTweetTypes = new Set(['TimelineTimelineCursor', 'TimelineUser']);
 const PromotedStrings = new Set(['suggest_promoted', 'Promoted', 'promoted']);
 
 function handleUserObject(obj: any, config: CompiledConfig, from_blue: boolean) {
@@ -109,10 +117,13 @@ export function ParseTimelineTweet(tweet: any, config: CompiledConfig) {
 	}
 
 	try {
+		const userResult =
+			tweet?.itemContent?.tweet_results?.result?.core?.user_results?.result ||
+			tweet?.itemContent?.tweet_results?.result?.tweet?.core?.user_results?.result;
+		const following = isFollowing(userResult);
 		if (
 			config.skipFollowingQrts &&
-			tweet?.itemContent?.tweet_results?.result?.core?.user_results?.result?.legacy
-				?.following &&
+			following &&
 			(tweet?.itemContent?.tweet_results?.result?.legacy?.is_quote_status ||
 				tweet?.tweet_results?.result?.legacy?.retweeted_status_result)
 		) {
@@ -121,9 +132,11 @@ export function ParseTimelineTweet(tweet: any, config: CompiledConfig) {
 					?.core?.user_results?.result ||
 				tweet?.itemContent?.tweet_results?.result?.quoted_status_result?.result?.core
 					?.user_results?.result;
+			const username = getUserName(skippedUser);
+			const screenName = getScreenName(skippedUser);
 			console.log(
 				logstr,
-				`skipping ${skippedUser.legacy.name} (@${skippedUser.legacy.screen_name}) because they got retweeted by someone you follow`,
+				`skipping ${username} (@${screenName}) because they got retweeted by someone you follow`,
 			);
 		}
 		// Handle retweets and quoted tweets (check the retweeted user, too)
@@ -144,7 +157,7 @@ export function ParseTimelineTweet(tweet: any, config: CompiledConfig) {
 		}
 		handleTweetObject(tweet.itemContent, config, promoted);
 	} catch (e) {
-		console.error(logstr, 'found unexpected tweet shape:', tweet);
+		console.error(logstr, 'found unexpected tweet shape:', JSON.stringify(tweet), e);
 		api.storage.local.set({
 			[EventKey]: {
 				type: ErrorEvent,
@@ -160,9 +173,25 @@ export function HandleInstructionsResponse(
 ) {
 	// pull the "instructions" object from the tweet
 	let _instructions = body;
-	for (const key of InstructionsPaths[e.detail.parsedUrl[1]]) {
-		// @ts-ignore
-		_instructions = _instructions[key];
+	let isFailed = false;
+	for (const keys of InstructionsPaths[e.detail.parsedUrl[1]]) {
+		try {
+			for (const key of keys) {
+				// @ts-ignore
+				_instructions = _instructions[key];
+			}
+			isFailed = false;
+			break;
+		} catch (err) {
+			// if we can't find the instructions, we just continue
+			_instructions = body;
+			isFailed = true;
+		}
+	}
+	if (isFailed) {
+		throw new Error(
+			`failed to find instructions in response body for ${e.detail.parsedUrl[1]}`,
+		);
 	}
 
 	// TODO: figure out how to do this cleanly

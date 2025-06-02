@@ -133,6 +133,15 @@ export function FormatLegacyName(user: { name: string; screen_name: string }) {
 	return `${legacyName} (@${screenName})`;
 }
 
+export function FormatBlueBlockerUser(user: BlueBlockerUser) {
+	const username = getUserName(user);
+	const screenName = getScreenName(user);
+	return FormatLegacyName({
+		name: username,
+		screen_name: screenName,
+	});
+}
+
 export function MakeToast(
 	content: string,
 	config: Config,
@@ -236,4 +245,43 @@ export function UsernameElement(userName: string, screenName: string): HTMLParag
 	p.appendChild(a);
 	p.appendChild(document.createTextNode(')'));
 	return p;
+}
+
+export function getUserName(user: BlueBlockerUser) {
+	const username = user?.legacy?.name || user?.core?.name;
+	if (!username) {
+		throw new Error(`Unable to get user name for user ${user.rest_id}`);
+	}
+
+	return username;
+}
+
+export function getScreenName(user: BlueBlockerUser) {
+	const screen_name = user?.legacy?.screen_name || user?.core?.screen_name;
+	if (!screen_name) {
+		throw new Error(`Unable to get screen name for user ${user.rest_id}`);
+	}
+
+	return screen_name;
+}
+
+export function isFollowing(user: BlueBlockerUser): boolean {
+	const following = user?.legacy?.following || user?.relationship_perspectives?.following;
+	if (following === undefined) {
+		throw new Error(`Unable to get following status for user ${user.rest_id}`); // if we can't determine following, throw an error. because one of these keys must exist.
+	}
+
+	return following;
+}
+
+export function isFollowedBy(user: BlueBlockerUser): boolean {
+	return user?.legacy?.followed_by || user?.relationship_perspectives?.followed_by || false; // if we can't determine followed by, assume not followed by
+}
+
+export function isBlocking(user: BlueBlockerUser): boolean {
+	return user?.legacy?.blocking || user?.relationship_perspectives?.blocking || false; // if we can't determine blocking, assume not blocking
+}
+
+export function isMuting(user: BlueBlockerUser): boolean {
+	return user?.legacy?.muting || user?.relationship_perspectives?.muting || false; // if we can't determine muting, assume not muting
 }
