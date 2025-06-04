@@ -71,7 +71,8 @@ export function ParseTimelineUser(obj: any, config: CompiledConfig, from_blue: b
 
 function handleTweetObject(obj: any, config: CompiledConfig, promoted: boolean) {
 	let ptr = obj,
-		uses_blue_feats = false;
+		uses_blue_feats = false,
+		uses_grok = false;
 	for (const key of UserObjectPath) {
 		if (ptr.__typename == 'TweetTombstone') {
 			// If we hit a deleted tweet, we bail
@@ -79,12 +80,14 @@ function handleTweetObject(obj: any, config: CompiledConfig, promoted: boolean) 
 		}
 		if (ptr.hasOwnProperty(key)) {
 			ptr = ptr[key];
-			if (
-				ptr.__typename == 'Tweet' &&
-				(ptr?.note_tweet?.is_expandable == true ||
-					typeof ptr?.edit_control?.edit_tweet_ids?.initial_tweet_id == 'string')
-			) {
-				uses_blue_feats = true;
+			if (ptr.__typename == 'Tweet') {
+				if ((ptr?.note_tweet?.is_expandable == true ||
+					typeof ptr?.edit_control?.edit_tweet_ids?.initial_tweet_id == 'string')) {
+						uses_blue_feats = true;
+					}
+				if ((ptr?.legacy?.full_text as string).match(/@grok/i)) {
+					uses_grok = true;
+				}
 			}
 		}
 	}
@@ -95,6 +98,7 @@ function handleTweetObject(obj: any, config: CompiledConfig, promoted: boolean) 
 	ptr.promoted_tweet = promoted;
 	ptr.is_blue_verified = ptr.is_blue_verified || uses_blue_feats;
 	ptr.used_blue = uses_blue_feats;
+	ptr.used_grok = uses_grok;
 	BlockBlueVerified(ptr as BlueBlockerUser, config);
 }
 
