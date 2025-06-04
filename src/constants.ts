@@ -46,6 +46,7 @@ export const DefaultOptions: Config = {
 	// TODO: when migrating to firefox manifest v3, check to see if sets can be stored yet
 	unblocked: {},
 	blockForUse: false,
+	blockForGrok: false,
 };
 export const Headers = [
 	// set by function:

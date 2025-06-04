@@ -744,6 +744,11 @@ export async function BlockBlueVerified(user: BlueBlockerUser, config: CompiledC
 		return;
 	}
 
+	if (config.blockForGrok && user.used_grok) {
+		queueBlockUser(user, String(user.rest_id), ReasonUsingBlueFeatures);
+		return;
+	}
+
 	// Step 1.5: Check for disallowed words or emojis in usernames.
 	const username = getUserName(user);
 	if (
