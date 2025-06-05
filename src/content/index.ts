@@ -28,6 +28,7 @@ function compileConfig(config: Config): CompiledConfig {
 		soupcanIntegration: config.soupcanIntegration,
 		blockPromoted: config.blockPromoted,
 		blockForUse: config.blockForUse,
+		blockForGrok: config.blockForGrok,
 		blockDisallowedWords: config.blockDisallowedWords,
 		disallowedWords:
 			config.disallowedWords.length === 0
