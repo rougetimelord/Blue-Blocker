@@ -40,7 +40,7 @@ const UserObjectPath: string[] = [
 	'user_results',
 	'result',
 ];
-const IgnoreTweetTypes = new Set(['TimelineTimelineCursor', 'TimelineUser']);
+const IgnoreTweetTypes = new Set(['TimelineTimelineCursor', 'TimelineUser', 'TimelineCommunity']);
 const PromotedStrings = new Set(['suggest_promoted', 'Promoted', 'promoted']);
 
 function handleUserObject(obj: any, config: CompiledConfig, from_blue: boolean) {
