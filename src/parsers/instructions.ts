@@ -9,16 +9,16 @@ import { getScreenName, getUserName, isFollowing } from '../utilities';
 // when parsing a timeline response body, these are the paths to navigate in the json to retrieve the "instructions" object
 // the key to this object is the capture group from the request regex in inject.js
 const InstructionsPaths: { [key: string]: string[][] } = {
-	HomeLatestTimeline: [
-		['data', 'home', 'home_timeline_urt', 'instructions']
-	],
+	HomeLatestTimeline: [['data', 'home', 'home_timeline_urt', 'instructions']],
 	HomeTimeline: [['data', 'home', 'home_timeline_urt', 'instructions']],
-	SearchTimeline: [['data', 'search_by_raw_query', 'search_timeline', 'timeline', 'instructions']],
+	SearchTimeline: [
+		['data', 'search_by_raw_query', 'search_timeline', 'timeline', 'instructions'],
+	],
 	Favoriters: [['data', 'favoriters_timeline', 'timeline', 'instructions']],
 	Retweeters: [['data', 'retweeters_timeline', 'timeline', 'instructions']],
 	UserTweets: [
 		['data', 'user', 'result', 'timeline_v2', 'timeline', 'instructions'],
-		['data', 'user', 'result', 'timeline', 'timeline', 'instructions']
+		['data', 'user', 'result', 'timeline', 'timeline', 'instructions'],
 	],
 	Followers: [['data', 'user', 'result', 'timeline', 'timeline', 'instructions']],
 	Following: [['data', 'user', 'result', 'timeline', 'timeline', 'instructions']],
@@ -26,7 +26,9 @@ const InstructionsPaths: { [key: string]: string[][] } = {
 	FollowersYouKnow: [['data', 'user', 'result', 'timeline', 'timeline', 'instructions']],
 	BlueVerifiedFollowers: [['data', 'user', 'result', 'timeline', 'timeline', 'instructions']],
 	TweetDetail: [['data', 'threaded_conversation_with_injections_v2', 'instructions']],
-	ModeratedTimeline: [['data', 'tweet', 'result', 'timeline_response', 'timeline', 'instructions']],
+	ModeratedTimeline: [
+		['data', 'tweet', 'result', 'timeline_response', 'timeline', 'instructions'],
+	],
 	'search/adaptive.json': [['timeline', 'instructions']],
 };
 // this is the path to retrieve the user object from the individual tweet
@@ -81,10 +83,12 @@ function handleTweetObject(obj: any, config: CompiledConfig, promoted: boolean) 
 		if (ptr.hasOwnProperty(key)) {
 			ptr = ptr[key];
 			if (ptr.__typename == 'Tweet') {
-				if ((ptr?.note_tweet?.is_expandable == true ||
-					typeof ptr?.edit_control?.edit_tweet_ids?.initial_tweet_id == 'string')) {
-						uses_blue_feats = true;
-					}
+				if (
+					ptr?.note_tweet?.is_expandable == true ||
+					typeof ptr?.edit_control?.edit_tweet_ids?.initial_tweet_id == 'string'
+				) {
+					uses_blue_feats = true;
+				}
 				if ((ptr?.legacy?.full_text as string).match(/@grok/i)) {
 					uses_grok = true;
 				}
@@ -183,7 +187,7 @@ export function HandleInstructionsResponse(
 				_instructions = _instructions[key];
 			}
 			isFailed = false;
-			break
+			break;
 		} catch (err) {
 			// if we can't find the instructions, we just continue
 			_instructions = body;
@@ -193,7 +197,7 @@ export function HandleInstructionsResponse(
 	if (isFailed) {
 		throw new Error(
 			`failed to find instructions in response body for ${e.detail.parsedUrl[1]}`,
-		)
+		);
 	}
 
 	// TODO: figure out how to do this cleanly
