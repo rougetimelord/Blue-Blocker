@@ -131,6 +131,7 @@ function eventHandler(e: CustomEvent<BlueBlockerEvent>) {
 if (api?.runtime?.getBrowserInfo) {
 	/** @ts-ignore Again, non-standard, literally only FF*/
 	exportFunction(
+		/** @ts-ignore */
 		event => {
 			eventHandler(event);
 		},
