@@ -85,6 +85,7 @@ export const ReasonTransphobia: number = 3;
 export const ReasonPromoted: number = 4;
 export const ReasonDisallowedWordsOrEmojis: number = 5;
 export const ReasonUsingBlueFeatures: number = 6;
+export const ReasonUsingGrok: number = 7;
 export const ReasonMap = {
 	[ReasonBlueVerified]: 'Twitter Blue verified',
 	[ReasonNftAvatar]: 'NFT avatar',
@@ -93,6 +94,7 @@ export const ReasonMap = {
 	[ReasonPromoted]: 'promoting tweets',
 	[ReasonDisallowedWordsOrEmojis]: 'disallowed words or emojis',
 	[ReasonUsingBlueFeatures]: 'using Twitter Blue features',
+	[ReasonUsingGrok]: 'using Grok',
 };
 
 export const emojiRegExp = RegExp(/^[\p{Emoji_Presentation}\u200d]+$/u, 'u');
