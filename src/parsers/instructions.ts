@@ -40,7 +40,12 @@ const UserObjectPath: string[] = [
 	'user_results',
 	'result',
 ];
-const IgnoreTweetTypes = new Set(['TimelineTimelineCursor', 'TimelineUser', 'TimelineCommunity', 'TimelineTweetComposer']);
+const IgnoreTweetTypes = new Set([
+	'TimelineTimelineCursor',
+	'TimelineUser',
+	'TimelineCommunity',
+	'TimelineTweetComposer',
+]);
 const PromotedStrings = new Set(['suggest_promoted', 'Promoted', 'promoted']);
 
 function handleUserObject(obj: any, config: CompiledConfig, from_blue: boolean) {
@@ -76,10 +81,6 @@ function handleTweetObject(obj: any, config: CompiledConfig, promoted: boolean) 
 		uses_blue_feats = false,
 		uses_grok = false;
 	for (const key of UserObjectPath) {
-		if (ptr.__typename == 'TweetTombstone') {
-			// If we hit a deleted tweet, we bail
-			return;
-		}
 		if (ptr.hasOwnProperty(key)) {
 			ptr = ptr[key];
 			if (ptr.__typename == 'Tweet') {
@@ -123,6 +124,13 @@ export function ParseTimelineTweet(tweet: any, config: CompiledConfig) {
 	}
 
 	try {
+		if (tweet?.itemContent?.tweet_results?.result?.__typename == 'TweetTombstone') {
+			/**
+			 * the tweet is deleted or hidden, therefore has no user attached
+			 * trying to check anything else will throw an error
+			 */
+			return;
+		}
 		const userResult =
 			tweet?.itemContent?.tweet_results?.result?.core?.user_results?.result ||
 			tweet?.itemContent?.tweet_results?.result?.tweet?.core?.user_results?.result;
