@@ -144,7 +144,7 @@ export function ParseTimelineTweet(tweet: any, config: CompiledConfig) {
 			const skippedUser =
 				tweet?.itemContent?.tweet_results?.result?.legacy?.retweeted_status_result?.result
 					?.core?.user_results?.result ||
-				tweet?.itemContent?.tweet_results?.result?.quoted_status_result?.result?.core
+				tweet?.itemContent?.tweet_results?.result?.quoted_status_result?.result?.tweet?.core
 					?.user_results?.result;
 			const username = getUserName(skippedUser);
 			const screenName = getScreenName(skippedUser);
